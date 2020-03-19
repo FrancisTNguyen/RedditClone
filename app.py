@@ -22,28 +22,6 @@ def get_time():
     return pstTime
 
 
-class User(db.Model):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(20), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
-    password = Column(String(20), nullable=False)
-    karma = Column(Integer, default=0)
-    createtime = Column(DateTime, default=get_time())
-    changetime = Column(DateTime, default=get_time())
-
-
-class Post(db.Model):
-    _table_name = 'posts'
-    postID = Column(Integer, primary_key=True)
-    username = Column(String(20), unique=True, nullable=False)
-    title = Column(String(120), nullable=False)
-    text = Column(String(500), nullable=False)
-    subreddit = Column(String(20), nullable=False)
-    createtime = Column(DateTime, default=get_time())
-    changetime = Column(DateTime, default=get_time())
-
-
 class UserData(mar.Schema):
     class Data:
         fields = ('id', 'username', 'email', 'password', 'karma', 'createtime', 'changetime')
@@ -109,10 +87,11 @@ def register():
 def add_karma():
     username = request.form['username']
     users = User.query.filter_by(username=username).first()
+    karma = User.query.filter_by(karma=karma).first()
     if users:
-        users.karma += int(request.form['karma'])
-        users.modify_time = get_time()
-        db.session.commit()
+        # users.karma += int(request.form['karma'])
+        karma += 1
+        db.session.commit()a
         return jsonify(message='Added karma!'), 202
     else:
         return jsonify('Could not add karma'), 404
@@ -198,6 +177,28 @@ def list_all_posts():
     listposts = Post.query.order_by(Post.create_time.desc())
     end = PostData.dump(listposts)
     return jsonify(end)
+
+
+class User(db.Model):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String(20), unique=True, nullable=False)
+    email = Column(String(120), unique=True, nullable=False)
+    password = Column(String(20), nullable=False)
+    karma = Column(Integer, default=0)
+    createtime = Column(DateTime, default=get_time())
+    changetime = Column(DateTime, default=get_time())
+
+
+class Post(db.Model):
+    _table_name = 'posts'
+    postID = Column(Integer, primary_key=True)
+    username = Column(String(20), unique=True, nullable=False)
+    title = Column(String(120), nullable=False)
+    text = Column(String(500), nullable=False)
+    subreddit = Column(String(20), nullable=False)
+    createtime = Column(DateTime, default=get_time())
+    changetime = Column(DateTime, default=get_time())
 
 
 userdata = UserData()
