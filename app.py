@@ -22,6 +22,28 @@ def get_time():
     return pstTime
 
 
+class User(db.Model):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String)
+    email = Column(String, unique=True)
+    password = Column(String)
+    karma = Column(Integer, default=0)
+    createtime = Column(DateTime, default=get_time())
+    changetime = Column(DateTime, default=get_time())
+
+
+class Post(db.Model):
+    _table_name = 'posts'
+    postID = Column(Integer, primary_key=True)
+    username = Column(String(20), unique=True, nullable=False)
+    title = Column(String(120), nullable=False)
+    text = Column(String(500), nullable=False)
+    subreddit = Column(String(20), nullable=False)
+    createtime = Column(DateTime, default=get_time())
+    changetime = Column(DateTime, default=get_time())
+
+
 class UserData(mar.Schema):
     class Data:
         fields = ('id', 'username', 'email', 'password', 'karma', 'createtime', 'changetime')
@@ -30,6 +52,13 @@ class UserData(mar.Schema):
 class PostData(mar.Schema):
     class Data:
         fields = ('id', 'username', 'title', 'text', 'subreddit', 'createtime', 'changetime')
+
+
+userdata = UserData()
+usermultdata = UserData(many=True)
+
+postdata = PostData()
+postmultdata = PostData(many=True)
 
 
 @app.cli.command('create_db')
@@ -86,12 +115,11 @@ def register():
 @app.route('/v1/api/user/add_karma', methods=['PUT'])
 def add_karma():
     username = request.form['username']
-    users = User.query.filter_by(username=username).first()
-    karma = User.query.filter_by(karma=karma).first()
-    if users:
+    user = User.query.filter_by(username=username).first()
+    if user:
         # users.karma += int(request.form['karma'])
-        karma += 1
-        db.session.commit()a
+        user.karma += 1
+        db.session.commit()
         return jsonify(message='Added karma!'), 202
     else:
         return jsonify('Could not add karma'), 404
@@ -178,34 +206,6 @@ def list_all_posts():
     end = PostData.dump(listposts)
     return jsonify(end)
 
-
-class User(db.Model):
-    __tablename__ = 'users'
-    id = Column(Integer, primary_key=True)
-    username = Column(String(20), unique=True, nullable=False)
-    email = Column(String(120), unique=True, nullable=False)
-    password = Column(String(20), nullable=False)
-    karma = Column(Integer, default=0)
-    createtime = Column(DateTime, default=get_time())
-    changetime = Column(DateTime, default=get_time())
-
-
-class Post(db.Model):
-    _table_name = 'posts'
-    postID = Column(Integer, primary_key=True)
-    username = Column(String(20), unique=True, nullable=False)
-    title = Column(String(120), nullable=False)
-    text = Column(String(500), nullable=False)
-    subreddit = Column(String(20), nullable=False)
-    createtime = Column(DateTime, default=get_time())
-    changetime = Column(DateTime, default=get_time())
-
-
-userdata = UserData()
-usermultdata = UserData(many=True)
-
-postdata = PostData()
-postmultdata = PostData(many=True)
 
 if __name__ == '__main__':
     app.run()
