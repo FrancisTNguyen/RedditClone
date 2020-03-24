@@ -216,9 +216,11 @@ def get_post(pid: int):
         return jsonify(message="Post does not exist"), 404
 
 # list posts by subreddit
-@app.route('/v1/api/posts/list_post_sub/<string:subreddit>', methods=['GET'])
+@app.route('/v1/api/posts/list_post_sub/<string:subreddit>/', methods=['GET'])
 def list_post_sub(subreddit: str):
-    posts = Post.query.filter_by(subreddit=subreddit).order_by(Post.createtime.desc())
+    # create amount argument to pass into the limit() function
+    amount = request.args.get('amount')
+    posts = db.session.query(Post).filter_by(subreddit=subreddit).order_by(Post.createtime.desc()).limit(amount)
     if posts:
         # serializes every variable in posts and returns them
         return jsonify(posts=[i.serialize() for i in posts])
@@ -228,7 +230,9 @@ def list_post_sub(subreddit: str):
 # list all posts
 @app.route('/v1/api/posts/list_all_posts/', methods=['GET'])
 def list_all_posts():
-    listposts = Post.query.order_by(Post.createtime.desc())
+    # create amount argument to pass into the limit() function
+    amount = request.args.get('amount')
+    listposts = db.session.query(Post).order_by(Post.createtime.desc()).limit(amount)
     return jsonify(listposts=[i.serialize() for i in listposts])
 
 
