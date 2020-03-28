@@ -151,7 +151,7 @@ def sub_karma():
         return jsonify('Could not subtract karma'), 404
 
 # update user's email
-@app.route('/v1/api/useer/update_email', methods=['PUT'])
+@app.route('/v1/api/user/update_email', methods=['PUT'])
 def update_email():
     username = request.form['username']
     users = User.query.filter_by(username=username).first()
@@ -199,7 +199,7 @@ def make_post():
 def delete_post(pid: int):
     post = Post.query.filter_by(postID=pid).first()
     if post:
-        db.session.delete(post)
+        Post.query.filter_by(postID=pid).delete()
         db.session.commit()
         return jsonify(message="Deleted a post"), 202
     else:
